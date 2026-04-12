@@ -1,0 +1,22 @@
+﻿@using IntranetGCM.Models
+
+<div class="noticia-card">
+    <img src="@noticia.ImagemUrl" alt="imagem" />
+
+    <h4>@noticia.Titulo</h4>
+
+    <p>@noticia.Resumo</p>
+
+    <small>
+        @noticia.Autor - @noticia.DataPublicacao.ToString("dd/MM/yyyy")
+    </small>
+
+    <br />
+
+    <a href="/noticias/@noticia.Id">Ler mais</a>
+</div>
+
+@code {
+    [Parameter]
+    public Noticia noticia { get; set; }
+}

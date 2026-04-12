@@ -1,0 +1,97 @@
+﻿@page "/noticias/nova"
+@rendermode InteractiveServer
+@using IntranetGCM.Models
+@using IntranetGCM.Services
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject NoticiaService NoticiaService
+
+<h3>Nova Notícia</h3>
+
+<EditForm Model="noticia" OnValidSubmit="Salvar">
+    <DataAnnotationsValidator />
+    <div>
+        <label>Imagem:</label>
+        <InputFile OnChange="SelecionarImagem" />
+    </div>
+    @if (preview != null)
+    {
+        <img src="@preview" width="200" />
+    }
+    <div>
+        <label>Título:</label>
+        <InputText @bind-Value="noticia.Titulo" />
+    </div>
+
+    <div>
+        <label>Resumo:</label>
+        <InputText @bind-Value="noticia.Resumo" />
+    </div>
+
+    <div>
+        <label>Conteúdo:</label>
+        <InputTextArea @bind-Value="noticia.Conteudo" />
+    </div>
+
+    <div>
+        <label>Autor:</label>
+        <InputText @bind-Value="noticia.Autor" />
+    </div>
+
+    <div>
+        <label>Categoria:</label>
+        <select @bind="noticia.CategoriaId">
+            <option value="0">Selecione uma categoria</option>
+            @foreach (var c in categorias)
+            {
+                <option value="@c.Id">@c.Nome</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit">Salvar</button>
+</EditForm>
+
+@code {
+    private Noticia noticia = new();
+    private List<CategoriaNoticia> categorias = new();
+    private IBrowserFile imagemSelecionada;
+    private string preview;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = await NoticiaService.ListarCategorias();
+    }
+
+    private async Task Salvar()
+    {
+        if (noticia.CategoriaId == 0)
+        {
+            Console.WriteLine("Categoria inválida");
+            return;
+        }
+        if (imagemSelecionada != null)
+        {
+            string nomeArquivo = Guid.NewGuid() + Path.GetExtension(imagemSelecionada.Name);
+            string caminho = Path.Combine("wwwroot/imagens", nomeArquivo);
+
+            using FileStream stream = new FileStream(caminho, FileMode.Create);
+
+            await imagemSelecionada.OpenReadStream(5 * 1024 * 1024).CopyToAsync(stream);
+
+            noticia.ImagemUrl = "/imagens/" + nomeArquivo;
+        }
+
+        await NoticiaService.Criar(noticia);
+    }
+
+    private async Task SelecionarImagem(InputFileChangeEventArgs e)
+    {
+        imagemSelecionada = e.File;
+
+        byte[] buffer = new byte[imagemSelecionada.Size];
+        await imagemSelecionada.OpenReadStream().ReadAsync(buffer);
+
+        preview = $"data:{imagemSelecionada.ContentType};base64,{Convert.ToBase64String(buffer)}";
+    }
+}

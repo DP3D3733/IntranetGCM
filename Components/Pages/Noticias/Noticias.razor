@@ -1,0 +1,29 @@
+﻿@page "/noticias"
+@using IntranetGCM.Models
+@using IntranetGCM.Services
+@inject NoticiaService NoticiaService
+
+<h3>Noticias</h3>
+
+@if (noticias == null)
+{
+    <p>Carregando...</p>
+}
+else
+{
+    <div class="grid">
+        @foreach (Noticia noticia in noticias)
+        {
+            <NoticiaCard noticia="noticia" />
+        }
+    </div>
+}
+
+@code {
+    private List<Noticia> noticias;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        noticias = await NoticiaService.ListarNoticia();
+    }
+}
