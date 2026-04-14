@@ -1,9 +1,11 @@
 ﻿using IntranetGCM.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace IntranetGCM.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<Usuario>
 {
 	public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 	public DbSet<Noticia> Noticias { get; set; }

@@ -2,6 +2,7 @@
 using IntranetGCM.Models;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace IntranetGCM.Services;
 
 public class NoticiaService
@@ -27,5 +28,10 @@ public class NoticiaService
 	public async Task<List<Noticia>> ListarNoticia()
 	{
 		return await _context.Noticias.ToListAsync();
+	}
+
+	public async Task<Noticia> GetNoticia(int id)
+	{
+		return await _context.Noticias.FindAsync(id);
 	}
 }

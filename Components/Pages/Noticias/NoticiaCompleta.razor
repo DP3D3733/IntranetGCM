@@ -1,0 +1,56 @@
+﻿@page "/noticias/{id:int}"
+@using IntranetGCM.Models
+@using IntranetGCM.Services
+@inject NoticiaService NoticiaService
+
+@if (noticia == null)
+{
+    <h3>Carregando...</h3>
+}
+else
+{
+    <div class="noticia-container">
+        @if (noticia == null)
+        {
+            <h3>Carregando...</h3>
+        }
+        else
+        {
+            <h1 class="titulo">@noticia.Titulo</h1>
+
+            <div class="meta">
+                <span>Por <strong>@noticia.Autor</strong></span>
+                <span>•</span>
+                <span>@noticia.DataPublicacao.ToString("dd/MM/yyyy")</span>
+
+                @if (noticia.DataAtualizacao != null)
+                {
+                    <span class="atualizado">
+                        Atualizado em @noticia.DataAtualizacao?.ToString("dd/MM/yyyy")
+                    </span>
+                }
+            </div>
+
+            <img class="imagem" src="@noticia.ImagemUrl" />
+
+            <div class="conteudo">
+                @foreach (string paragrafo in noticia.Conteudo.Split("\n"))
+                {
+                    <p>@paragrafo</p>
+                }
+            </div>
+        }
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Noticia noticia;
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        noticia = await NoticiaService.GetNoticia(Id);
+    }
+}

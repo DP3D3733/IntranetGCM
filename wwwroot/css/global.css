@@ -1,0 +1,70 @@
+:root {
+    --azul-principal: #0b1f4b;   /* azul escuro do círculo */
+    --azul-secundario: #132c6b;
+    --dourado: #d4af37;
+    --bege: #f4e4b8;
+    --cinza-bg: #f3f4f6;
+    --texto: #1f2937;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+.page {
+    display: flex;
+    height: 100vh;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
+    padding: 20px 30px;
+    margin: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.btn-primary {
+    background: var(--azul-principal);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: var(--azul-secundario);
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f3f4f600; /* fundo */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #74747465; /* azul principal */
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #132c6b;
+}

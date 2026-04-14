@@ -1,0 +1,58 @@
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(180deg, #0b1f4b, #132c6b);
+    color: white;
+}
+
+/* container interno */
+.sidebar-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* topo */
+.sidebar-header {
+    padding: 20px;
+    font-weight: 600;
+    font-size: 18px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* menu */
+.menu {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+/* item */
+.menu-item {
+    color: #e5e7eb;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+}
+
+/* hover */
+.menu-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* ativo (NavLink automático) */
+.menu-item.active {
+    background: #d4af37;
+    color: #0b1f4b;
+    font-weight: 600;
+}
+
+.logo-img {
+    width: 100px;
+    margin: 0 auto 5px auto;
+    display: block;
+}
