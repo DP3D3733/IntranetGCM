@@ -1,0 +1,162 @@
+﻿@page "/usuarios/{id}"
+@using IntranetGCM.Models
+@using IntranetGCM.Services
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims;
+@inject UsuarioService usuarioService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject UserManager<Usuario> UserManager
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+
+<h3>Usuário</h3>
+
+@if (!carregado)
+{
+    <p>Carregando...</p>
+}
+else if (!podeAcessar)
+{
+    Nav.NavigateTo("/access-denied");
+}
+else
+{
+    
+    <EditForm Model="@updateCadastroRequest" OnValidSubmit="UpdateCadastro" FormName="UpdateCadastroForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div>
+            <label>Nome</label>
+            <InputText @bind-Value="updateCadastroRequest.Nome" />
+        </div>
+
+        <div>
+            <label>Email</label>
+            <InputText @bind-Value="updateCadastroRequest.Email" />
+        </div>
+
+        <div>
+            <label>Nova Senha</label>
+            <InputText @bind-Value="updateCadastroRequest.Password" type="password" autocomplete="new-password" />
+        </div>
+
+        <div>
+            <label>Confirmar Nova Senha</label>
+            <InputText @bind-Value="updateCadastroRequest.ConfirmPassword" type="password"
+                       autocomplete="new-passwordConfirm" />
+        </div>
+        
+        <ul>
+            @foreach (string role in rolesAExibir)
+            {
+                <li>
+                    <AuthorizeView Roles="Admin" Context="SelecionarFuncoes">
+                        <input type="checkbox" value="@role" checked="@rolesSelecionadas.Contains(role)"
+                               @onchange="e => ModificaArrayRolesSelecionadas(role, (bool)e.Value)" />
+                    </AuthorizeView>
+                    
+                    @role
+                </li>
+            }
+        </ul>
+        
+        <button type="submit">Salvar</button>
+    </EditForm>
+}
+
+
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+
+    bool podeAcessar = false;
+
+    bool carregado = false;
+
+    private Usuario? usuarioDaPagina;
+    public UpdateCadastroRequest updateCadastroRequest { get; set; } = new();
+
+    private List<string> roles = new();
+    private List<string> rolesSelecionadas = new();
+
+    private List<string> rolesAExibir = new();
+
+    private bool isAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        ClaimsPrincipal userPrincipal = authState.User;
+
+        Usuario user = await UserManager.GetUserAsync(userPrincipal);
+
+        isAdmin = await UserManager.IsInRoleAsync(user, "Admin");
+        bool isOwner = user.Id == id;
+
+        carregado = true;
+
+        if (isAdmin || isOwner)
+        {
+            podeAcessar = true;
+        }
+
+        usuarioDaPagina = await UserManager.FindByIdAsync(id);
+
+        updateCadastroRequest.Nome = usuarioDaPagina.Nome;
+        updateCadastroRequest.Email = usuarioDaPagina.Email;
+
+        rolesSelecionadas = await usuarioService.GetRoles(usuarioDaPagina);
+        roles = await usuarioService.GetTodasRoles();
+
+        if (isAdmin)
+        {
+            rolesAExibir = roles;
+        }
+        else
+        {
+            rolesAExibir = rolesSelecionadas;
+        }
+    }
+
+    private async Task UpdateCadastro()
+    {
+        var (successUpdate, errorsUpdate) = await usuarioService.AtualizarUsuario(updateCadastroRequest);
+
+        if (!successUpdate)
+        {
+            foreach (var error in errorsUpdate)
+            {
+                Console.WriteLine(error);
+            }
+            return;
+        }
+
+        var (successRoles, errorsRoles) = await usuarioService.AtualizarRoles(rolesSelecionadas, usuarioDaPagina);
+
+        if (!successRoles)
+        {
+            foreach (var error in errorsRoles)
+            {
+                Console.WriteLine(error);
+            }
+            return;
+        }
+
+        Console.WriteLine("Dados do usuários alterados com sucesso");
+    }
+
+    private void ModificaArrayRolesSelecionadas(string role, bool isChecked)
+    {
+        if (isChecked)
+        {
+            if (!rolesSelecionadas.Contains(role))
+                rolesSelecionadas.Add(role);
+        }
+        else
+        {
+            rolesSelecionadas.Remove(role);
+        }
+    }
+}

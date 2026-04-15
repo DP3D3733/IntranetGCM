@@ -1,0 +1,57 @@
+﻿@page "/register"
+
+@using IntranetGCM.Models
+@using IntranetGCM.Services
+@using Microsoft.AspNetCore.Identity
+@inject UsuarioService usuarioService
+
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<EditForm Model="@registerRequest" OnValidSubmit="Register" FormName="RegisterForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div>
+        <label>Nome</label>
+        <InputText @bind-Value="registerRequest.Nome" type="password" />
+    </div>
+
+    <div>
+        <label>Email</label>
+        <InputText @bind-Value="registerRequest.Email" />
+    </div>
+
+    <div>
+        <label>Senha</label>
+        <InputText @bind-Value="registerRequest.Password" type="password" />
+    </div>
+
+    <div>
+        <label>Confirmar Senha</label>
+        <InputText @bind-Value="registerRequest.ConfirmPassword" type="password" />
+    </div>
+
+    <button type="submit">Cadastrar</button>
+</EditForm>
+
+@code {
+    public RegisterRequest registerRequest { get; set; } = new();
+
+    private async Task Register()
+    {
+        var (success, errors) = await usuarioService.RegisterAsync(registerRequest);
+
+        if (!success)
+        {
+            foreach (var error in errors)
+            {
+                Console.WriteLine(error);
+            }
+            return;
+        }
+
+        Console.WriteLine("Usuário criado com sucesso");
+
+        Nav.NavigateTo("/login");
+    }
+}

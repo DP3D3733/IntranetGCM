@@ -37,6 +37,8 @@
     border-radius: 6px;
     margin-bottom: 5px;
     transition: all 0.2s ease;
+    cursor: pointer;
+    user-select: none;
 }
 
 /* hover */
@@ -49,6 +51,20 @@
     background: #d4af37;
     color: #0b1f4b;
     font-weight: 600;
+}
+
+.submenu {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+    background: #34495e62;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 🔥 quando abre */
+.submenu.open {
+    max-height: 200px; /* ajuste conforme quantidade de itens */
 }
 
 .logo-img {

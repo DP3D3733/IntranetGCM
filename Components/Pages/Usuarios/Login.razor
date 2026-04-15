@@ -27,13 +27,16 @@
 </div>
 
 @code {
-    string email = "admin@gcm.com";
-    string senha = "Admin@123";
+    
+
+    string email;
+    string senha;
     string erro;
+    @* "admin@gcm.com", "Admin@123" *@
 
     private async Task Logar()
     {
-        bool logouComSucesso = await JS.InvokeAsync<bool>("logar", "admin@gcm.com", "Admin@123");
+        bool logouComSucesso = await JS.InvokeAsync<bool>("logar", email, senha);
         if (logouComSucesso)
         {
             Nav.NavigateTo("/",true);

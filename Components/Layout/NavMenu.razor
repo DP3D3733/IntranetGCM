@@ -15,30 +15,44 @@
         <NavLink class="menu-item" href="" Match="NavLinkMatch.All">
             🏠 Home
         </NavLink>
+        <AuthorizeView Roles="Admin">
+            <div class="menu-item" @onclick="ToggleAdmin">
+                ⚙️ Administração ▼
+            </div>
 
-        <NavLink class="menu-item" href="counter">
-            ➕ Counter
-        </NavLink>
+            @if (adminAberto)
+            {
+                <div class="submenu @(adminAberto ? "open" : "")">
+                    <NavLink class="menu-item" href="usuarios">
+                        👥 Gerenciar Usuários
+                    </NavLink>
+                    <NavLink class="menu-item" href="roles">
+                        🪛 Gerenciar Funções
+                    </NavLink>
+                </div>
+            }
+        </AuthorizeView>
+
         <!-- 🔐 LOGADO -->
         <AuthorizeView>
             <Authorized>
                 
-                <NavLink class="menu-item" href="perfil">
+                <NavLink class="menu-item" @onclick="AcessarUsuario">
                     👤 Meu Perfil
                 </NavLink>
 
-                <NavLink class="menu-item" href="admin">
-                    ⚙️ Administração
-                </NavLink>
+                
 
-                <button class="menu-item" @onclick="Logout">
+                <button class="btn-primary" @onclick="Logout">
                     🚪 Sair
                 </button>
+
+                
 
             </Authorized>
 
             <NotAuthorized>
-                <NavLink class="menu-item" href="/login">
+                <NavLink class="menu-item" href="login">
                     🔑 Login
                 </NavLink>
             </NotAuthorized>
@@ -56,6 +70,32 @@
         {
             Nav.NavigateTo("/", true);
         }
+    }
+
+    bool adminAberto = false;
+
+    void ToggleAdmin()
+    {
+        adminAberto = !adminAberto;
+    }
+
+    string? userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        }
+    }
+
+    async void AcessarUsuario()
+    {
+        if(!String.IsNullOrWhiteSpace(userId))
+            Nav.NavigateTo($"/usuarios/{userId}");
     }
 }
 

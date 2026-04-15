@@ -12,7 +12,6 @@ public static class AuthEndpoints
             UserManager<Usuario> userManager,
             LoginRequest request) =>
             {
-
                 var user = await userManager.FindByEmailAsync(request.Email);
                 Console.WriteLine("Verificando autorização");
                 if (user is null)

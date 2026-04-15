@@ -1,0 +1,57 @@
+﻿@page "/usuarios"
+@using IntranetGCM.Models
+@using IntranetGCM.Services
+@rendermode InteractiveServer
+@inject NavigationManager Nav
+@inject UsuarioService usuarioService
+
+<h3>Usuários Cadastrados</h3>
+
+@if (usuarios == null)
+{
+    <p>Carregando usuários...</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Funções</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Usuario usuario in usuarios)
+            {
+                <tr @onclick="() => AcessarUsuario(usuario.Id)">
+                    <td>@usuario.Nome</td>
+                    <td>@usuario.Email</td>
+                    <td>@rolesDict[usuario.Id]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<Usuario> usuarios = new();
+    Dictionary<string, string> rolesDict = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await usuarioService.ListarUsuarios();
+
+        foreach (var user in usuarios)
+        {
+            var roles = await usuarioService.GetRoles(user);
+            rolesDict[user.Id] = string.Join(", ", roles);
+        }
+    }
+
+    private void AcessarUsuario(string id)
+    {
+        Nav.NavigateTo($"/usuarios/{id}");
+    }
+
+}
