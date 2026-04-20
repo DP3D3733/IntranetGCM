@@ -1,42 +1,50 @@
-﻿@page "/register"
+﻿@page "/usuarios/register"
 
 @using IntranetGCM.Models
 @using IntranetGCM.Services
 @using Microsoft.AspNetCore.Identity
 @inject UsuarioService usuarioService
-
 @inject NavigationManager Nav
+@inject ToastService ToastService
 @rendermode InteractiveServer
 
-<EditForm Model="@registerRequest" OnValidSubmit="Register" FormName="RegisterForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    <div>
-        <label>Nome</label>
-        <InputText @bind-Value="registerRequest.Nome" type="password" />
-    </div>
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+<h2>Cadastrar Novo Usuário</h2>
+<div class="card">
+    <EditForm autocomplete="off" Model="@registerRequest" OnValidSubmit="Register" FormName="RegisterForm">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label>Nome</label>
+            <InputText class="input" @bind-Value="registerRequest.Nome" />
+            <ValidationMessage For="@(() => registerRequest.Nome)" />
+        </div>
 
-    <div>
-        <label>Email</label>
-        <InputText @bind-Value="registerRequest.Email" />
-    </div>
+        <div class="form-group">
+            <label>Email</label>
+            <InputText class="input" @bind-Value="registerRequest.Email" />
+            <ValidationMessage For="@(() => registerRequest.Email)" />
+        </div>
 
-    <div>
-        <label>Senha</label>
-        <InputText @bind-Value="registerRequest.Password" type="password" />
-    </div>
+        <div class="form-group">
+            <label>Senha</label>
+            <PasswordInput @bind-Value="registerRequest.Password" />
+            <ValidationMessage For="@(() => registerRequest.Password)" />
+        </div>
 
-    <div>
-        <label>Confirmar Senha</label>
-        <InputText @bind-Value="registerRequest.ConfirmPassword" type="password" />
-    </div>
+        <div class="form-group">
+            <label>Confirmar Senha</label>
+            <PasswordInput @bind-Value="registerRequest.ConfirmPassword" />
+            <ValidationMessage For="@(() => registerRequest.ConfirmPassword)" />
+        </div>
 
-    <button type="submit">Cadastrar</button>
-</EditForm>
+        <Button Color="ButtonColor.Primary" Type="ButtonType.Submit">Cadastrar</Button>
+        <Button Color="ButtonColor.Secondary" @onclick="CancelaCadastro">Cancelar</Button>
+    </EditForm>
+</div>
 
 @code {
+    
     public RegisterRequest registerRequest { get; set; } = new();
-
     private async Task Register()
     {
         var (success, errors) = await usuarioService.RegisterAsync(registerRequest);
@@ -45,13 +53,17 @@
         {
             foreach (var error in errors)
             {
-                Console.WriteLine(error);
+                ToastService.Notify(new(ToastType.Danger, $"Erro: {error}"));
             }
             return;
         }
-
-        Console.WriteLine("Usuário criado com sucesso");
+        ToastService.Notify(new(ToastType.Success, $"Usuário criado com sucesso."));
 
         Nav.NavigateTo("/login");
+    }
+
+    void CancelaCadastro()
+    {
+        Nav.NavigateTo("/usuarios");
     }
 }

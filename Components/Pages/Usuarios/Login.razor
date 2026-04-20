@@ -1,45 +1,55 @@
 ﻿@page "/login"
 @using IntranetGCM.Models
-@using Microsoft.AspNetCore.Identity
-@using static System.Net.WebRequestMethods
 @using System.Net.Http.Json
-@inject IJSRuntime JS
 
 @rendermode InteractiveServer
-@inject UserManager<Usuario> UserManager
-
-@inject SignInManager<Usuario> SignInManager
 @inject NavigationManager Nav
-@inject HttpClient Http
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ToastService toastService
 
-<div class="login-container">
-    <h2>Login</h2>
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+<h2>Login</h2>
+<div class="card">
+    <form method="post" action="/api/login" autocomplete="off">
+        <input type="hidden" name="__RequestVerificationToken" value="@token" />
+        <div class="form-group">
+            <label>Email</label>
+            <input class="input" name="email" value="@loginRequest.Email" />
+        </div>
 
-    <input @bind="email" placeholder="Email" />
-    <input @bind="senha" type="password" placeholder="Senha" />
+        <div class="form-group">
+            <label>Senha</label>
+            <PasswordInput name="password" @bind-Value="loginRequest.Password" />
+        </div>
 
-    <button class="btn-primary" @onclick="Logar">Entrar</button>
-
-    @if (!string.IsNullOrEmpty(erro))
-    {
-        <p class="erro">@erro</p>
-    }
+        <Button Color="ButtonColor.Primary" Type="ButtonType.Submit">Login</Button>
+    </form>
 </div>
 
 @code {
-    
+    string token = "";
 
-    string email;
-    string senha;
-    string erro;
-    @* "admin@gcm.com", "Admin@123" *@
-
-    private async Task Logar()
+    protected override void OnInitialized()
     {
-        bool logouComSucesso = await JS.InvokeAsync<bool>("logar", email, senha);
-        if (logouComSucesso)
+        var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext!);
+        token = tokens.RequestToken!;
+    }
+    public LoginRequest loginRequest { get; set; } = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            Nav.NavigateTo("/",true);
+            var uri = new Uri(Nav.Uri);
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+            if (query.TryGetValue("erro", out var erroMsg))
+            {
+                var erro = erroMsg.ToString();
+
+                toastService.Notify(new(ToastType.Danger, $"Erro: {erro}"));
+            }
         }
     }
 }

@@ -7,14 +7,18 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject UserManager<Usuario> UserManager
 @inject NavigationManager Nav
+@inject ToastService ToastService
 @rendermode InteractiveServer
 
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
-<h3>Usuário</h3>
+<h3 class="titulo">Usuário</h3>
+
+<ConfirmDialog @ref="dialog" />
 
 @if (!carregado)
 {
-    <p>Carregando...</p>
+    <p class="loading">Carregando...</p>
 }
 else if (!podeAcessar)
 {
@@ -22,48 +26,61 @@ else if (!podeAcessar)
 }
 else
 {
-    
-    <EditForm Model="@updateCadastroRequest" OnValidSubmit="UpdateCadastro" FormName="UpdateCadastroForm">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div>
-            <label>Nome</label>
-            <InputText @bind-Value="updateCadastroRequest.Nome" />
-        </div>
+    <div class="card">
 
-        <div>
-            <label>Email</label>
-            <InputText @bind-Value="updateCadastroRequest.Email" />
-        </div>
+        <EditForm Model="@updateCadastroRequest" OnValidSubmit="UpdateCadastro" FormName="UpdateCadastroForm">
 
-        <div>
-            <label>Nova Senha</label>
-            <InputText @bind-Value="updateCadastroRequest.Password" type="password" autocomplete="new-password" />
-        </div>
+            <DataAnnotationsValidator />
 
-        <div>
-            <label>Confirmar Nova Senha</label>
-            <InputText @bind-Value="updateCadastroRequest.ConfirmPassword" type="password"
-                       autocomplete="new-passwordConfirm" />
+            <div class="form-group">
+                <label>Nome</label>
+                <InputText class="input" @bind-Value="updateCadastroRequest.Nome" />
+                <ValidationMessage For="@(() => updateCadastroRequest.Nome)" />
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <InputText class="input" @bind-Value="updateCadastroRequest.Email" />
+                <ValidationMessage For="@(() => updateCadastroRequest.Email)" />
+            </div>
+
+            <div class="form-group">
+                <label>Nova Senha</label>
+                <InputText class="input" @bind-Value="updateCadastroRequest.Password" type="password"
+                           autocomplete="new-password" />
+                <ValidationMessage For="@(() => updateCadastroRequest.Password)" />
+            </div>
+
+            <div class="form-group">
+                <label>Confirmar Nova Senha</label>
+                <InputText class="input" @bind-Value="updateCadastroRequest.ConfirmPassword" type="password"
+                           autocomplete="new-password" />
+                <ValidationMessage For="@(() => updateCadastroRequest.ConfirmPassword)" />
+            </div>
+
+            <div class="roles">
+                <label>Funções</label>
+
+                @foreach (var role in rolesAExibir)
+                {
+                    <AuthorizeView Roles="Admin" Context="EditarFuncoes">
+                        <div class="role-item">
+                            <label>
+                                <input type="checkbox" checked="@rolesSelecionadas.Contains(role)"
+                                       @onchange="e => ModificaArrayRolesSelecionadas(role, (bool)e.Value)" />
+                                @role</label>
+                            </div>
+                        </AuthorizeView>
+                    }
+                </div>
+                <Button Color="ButtonColor.Primary" Type="ButtonType.Submit">Salvar</Button>
+                <AuthorizeView Roles="Admin" Context="ExcluirUsuarioButton">
+                    <Button Class="left" Color="ButtonColor.Danger" @onclick="ShowConfirmationAsync">Excluir Usuário</Button>
+                </AuthorizeView>
+            </EditForm>
+
         </div>
-        
-        <ul>
-            @foreach (string role in rolesAExibir)
-            {
-                <li>
-                    <AuthorizeView Roles="Admin" Context="SelecionarFuncoes">
-                        <input type="checkbox" value="@role" checked="@rolesSelecionadas.Contains(role)"
-                               @onchange="e => ModificaArrayRolesSelecionadas(role, (bool)e.Value)" />
-                    </AuthorizeView>
-                    
-                    @role
-                </li>
-            }
-        </ul>
-        
-        <button type="submit">Salvar</button>
-    </EditForm>
-}
+    }
 
 
 
@@ -128,6 +145,7 @@ else
         {
             foreach (var error in errorsUpdate)
             {
+                ToastService.Notify(new(ToastType.Danger, $"Erro: {error}"));
                 Console.WriteLine(error);
             }
             return;
@@ -140,11 +158,13 @@ else
             foreach (var error in errorsRoles)
             {
                 Console.WriteLine(error);
+                ToastService.Notify(new(ToastType.Danger, $"Erro: {error}"));
             }
             return;
         }
 
         Console.WriteLine("Dados do usuários alterados com sucesso");
+        ToastService.Notify(new(ToastType.Success, "Dados do usuários alterados com sucesso"));
     }
 
     private void ModificaArrayRolesSelecionadas(string role, bool isChecked)
@@ -157,6 +177,46 @@ else
         else
         {
             rolesSelecionadas.Remove(role);
+        }
+    }
+
+    private async Task ExcluirUsuario()
+    {
+        var (successExcluir, errorsExcluir) = await usuarioService.ExcluirUsuario(usuarioDaPagina.Id);
+
+        if (!successExcluir)
+        {
+            foreach (string error in errorsExcluir)
+            {
+                ToastService.Notify(new(ToastType.Danger, $"Erro: {error}"));
+                Console.WriteLine(error);
+            }
+            return;
+        }
+        ToastService.Notify(new(ToastType.Success, "Usuário excluído com sucesso"));
+        Console.WriteLine("Usuário excluído com sucesso");
+        Nav.NavigateTo("/usuarios");
+    }
+
+    private ConfirmDialog dialog = default!;
+
+    private async Task ShowConfirmationAsync()
+    {
+        var options = new ConfirmDialogOptions
+        {
+            YesButtonText = "Excluir",
+            YesButtonColor = ButtonColor.Danger,
+            NoButtonText = "Cancelar",
+            NoButtonColor = ButtonColor.Secondary
+        };
+        var confirmation = await dialog.ShowAsync(
+            title: "Tem certeza que deseja excluir esse usuário?",
+            message1: "Não será possível desfazer a operação. Prosseguir?",
+            confirmDialogOptions: options);
+
+        if (confirmation)
+        {
+            await ExcluirUsuario();
         }
     }
 }

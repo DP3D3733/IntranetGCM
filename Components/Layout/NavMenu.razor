@@ -17,7 +17,7 @@
         </NavLink>
         <AuthorizeView Roles="Admin">
             <div class="menu-item" @onclick="ToggleAdmin">
-                ⚙️ Administração ▼
+                ⚙️ Administração @(adminAberto ? "▲" : "▼")
             </div>
 
             @if (adminAberto)
@@ -40,15 +40,15 @@
                 <NavLink class="menu-item" @onclick="AcessarUsuario">
                     👤 Meu Perfil
                 </NavLink>
+                <form method="post" action="/logout">
+                    <Button Color="ButtonColor.Primary" Type="ButtonType.Submit">
+                        🚪 Sair
+                    </Button>
+                </form>
 
                 
 
-                <button class="btn-primary" @onclick="Logout">
-                    🚪 Sair
-                </button>
-
                 
-
             </Authorized>
 
             <NotAuthorized>
@@ -65,11 +65,7 @@
 {
     async Task Logout()
     {
-        bool logoutComSucesso = await JS.InvokeAsync<bool>("logout");
-        if (logoutComSucesso)
-        {
-            Nav.NavigateTo("/", true);
-        }
+        Nav.NavigateTo("/logout", true);
     }
 
     bool adminAberto = false;
@@ -94,7 +90,7 @@
 
     async void AcessarUsuario()
     {
-        if(!String.IsNullOrWhiteSpace(userId))
+        if (!String.IsNullOrWhiteSpace(userId))
             Nav.NavigateTo($"/usuarios/{userId}");
     }
 }

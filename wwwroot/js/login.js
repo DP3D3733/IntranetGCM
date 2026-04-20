@@ -1,4 +1,4 @@
-window.logar = async function(email, password) {
+window.logar = async function (email, password) {
     const response = await fetch("/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -6,21 +6,17 @@ window.logar = async function(email, password) {
         credentials: "include" // ESSENCIAL para o cookie ser armazenado
     });
 
-    if (response.ok) {
-        return true;
-    } else {
-        return false;
-    }
+    return response;
 };
 
-window.logout = async function() {
+window.logout = async function () {
     const response = await fetch("/logout", {
         method: "POST",
         headers: { "Content-Type": "application/json" }
     });
 
     if (response.ok) {
-        return true;
+        return response;
     } else {
         return false;
     }

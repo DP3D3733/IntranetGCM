@@ -8,11 +8,13 @@ public class UsuarioService
 {
     private readonly UserManager<Usuario> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public UsuarioService(UserManager<Usuario> userManager, RoleManager<IdentityRole> roleManager)
+    public UsuarioService(UserManager<Usuario> userManager, RoleManager<IdentityRole> roleManager, IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<(bool Success, List<string> Errors)> RegisterAsync(RegisterRequest request)
@@ -23,6 +25,7 @@ public class UsuarioService
             UserName = request.Email,
             Email = request.Email
         };
+        Console.WriteLine($"Nome antes de salvar: {user.Nome}");
 
         var result = await _userManager.CreateAsync(user, request.Password);
 
@@ -63,7 +66,7 @@ public class UsuarioService
         {
             return (false, removeResult.Errors.Select(e => e.Description).ToList());
         }
-        
+
         var result = await _userManager.AddToRolesAsync(usuario, roles);
 
         if (!result.Succeeded)
@@ -104,6 +107,30 @@ public class UsuarioService
         }
 
 
+
+        return (true, new List<string>());
+    }
+
+    public async Task<(bool Success, List<string> Errors)> ExcluirUsuario(string userId)
+    {
+        var usuario = await _userManager.FindByIdAsync(userId);
+
+        if (usuario == null)
+            return (false, new List<string> { "Usuário não encontrado" });
+
+        if (usuario.Id == _userManager.GetUserId(_httpContextAccessor.HttpContext.User))
+        {
+            return (false, new List<string> { "Você não pode excluir seu próprio usuário" });
+        }
+
+        var result = await _userManager.DeleteAsync(usuario);
+
+        if (!result.Succeeded)
+        {
+            return (false, result.Errors
+            .Select(e => e.Description)
+            .ToList());
+        }
 
         return (true, new List<string>());
     }

@@ -1,0 +1,82 @@
+.titulo {
+    margin-bottom: 16px;
+}
+
+.loading,
+.empty {
+    color: #666;
+    font-style: italic;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.tabela-usuarios {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+.tabela-usuarios th {
+    text-align: left;
+    padding: 10px;
+    background-color: var(--azul-secundario);
+    border-bottom: 2px solid #ddd;
+    color: white;
+}
+
+.tabela-usuarios td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.linha {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.linha:hover {
+    background-color: #f0f8ff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.roles {
+    margin: 15px 0;
+}
+
+.role-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.card {
+    max-width: 500px;
+    padding: 20px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+form{
+    position: relative;
+}
+
+#novoUsuarioButton {
+    right: 30px;
+    transform: translatey(-120%);
+}

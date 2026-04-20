@@ -1,5 +1,6 @@
 :root {
-    --azul-principal: #0b1f4b;   /* azul escuro do círculo */
+    --azul-principal: #0b1f4b;
+    /* azul escuro do círculo */
     --azul-secundario: #132c6b;
     --dourado: #d4af37;
     --bege: #f4e4b8;
@@ -29,26 +30,32 @@ main {
     margin: 0;
     height: 100vh;
     overflow-y: auto;
+    position: relative;
 }
 
 .btn-primary {
     background: var(--azul-principal);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    cursor: pointer;
+    border-color: var(--azul-principal);
 }
 
 .btn-primary:hover {
     background: var(--azul-secundario);
 }
 
+.danger {
+    background-color: red;
+}
+
+.left {
+    position: absolute;
+    right: 0;
+}
+
 .card {
     background: white;
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 /* Chrome, Edge, Safari */
@@ -57,14 +64,38 @@ main {
 }
 
 ::-webkit-scrollbar-track {
-    background: #f3f4f600; /* fundo */
+    background: #f3f4f600;
+    /* fundo */
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #74747465; /* azul principal */
+    background: #74747465;
+    /* azul principal */
     border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: #132c6b;
+}
+
+input.invalid {
+    border: 1px solid #dc3545;
+    background-color: #fff5f5;
+}
+
+input.valid {
+    border: 1px solid #198754;
+}
+
+.validation-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+}
+
+.validation-summary-errors {
+    color: #842029;
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    padding: 10px;
+    border-radius: 5px;
 }

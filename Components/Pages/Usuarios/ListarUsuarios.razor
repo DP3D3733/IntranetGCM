@@ -5,33 +5,40 @@
 @inject NavigationManager Nav
 @inject UsuarioService usuarioService
 
-<h3>Usuários Cadastrados</h3>
+<h3 class="titulo">Usuários Cadastrados</h3>
+<Button Color="ButtonColor.Warning" Id="novoUsuarioButton" Class="left" @onclick="AcessaTelaCadastro">Cadastrar Novo Usuário</Button>
 
 @if (usuarios == null)
 {
-    <p>Carregando usuários...</p>
+    <p class="loading">Carregando usuários...</p>
+}
+else if (!usuarios.Any())
+{
+    <p class="empty">Nenhum usuário encontrado.</p>
 }
 else
 {
-    <table>
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Funções</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (Usuario usuario in usuarios)
-            {
-                <tr @onclick="() => AcessarUsuario(usuario.Id)">
-                    <td>@usuario.Nome</td>
-                    <td>@usuario.Email</td>
-                    <td>@rolesDict[usuario.Id]</td>
+    <div class="table-container">
+        <table class="tabela-usuarios">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Funções</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var usuario in usuarios)
+                {
+                    <tr class="linha" @onclick="() => AcessarUsuario(usuario.Id)">
+                        <td>@usuario.Nome</td>
+                        <td>@usuario.Email</td>
+                        <td>@rolesDict[usuario.Id]</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {
@@ -52,6 +59,11 @@ else
     private void AcessarUsuario(string id)
     {
         Nav.NavigateTo($"/usuarios/{id}");
+    }
+
+    private void AcessaTelaCadastro()
+    {
+        Nav.NavigateTo($"/usuarios/register");
     }
 
 }

@@ -6,37 +6,37 @@ public static class AuthEndpoints
 {
     public static void MapAuthEndpoints(this WebApplication app)
     {
-        app.MapPost("/login", async (
+        app.MapPost("/api/login", async (
             HttpContext ctx,
             SignInManager<Usuario> signInManager,
-            UserManager<Usuario> userManager,
-            LoginRequest request) =>
-            {
-                var user = await userManager.FindByEmailAsync(request.Email);
-                Console.WriteLine("Verificando autorização");
-                if (user is null)
-                {
-                    return Results.Unauthorized();
-                }
+            UserManager<Usuario> userManager) =>
+        {
+            var form = await ctx.Request.ReadFormAsync();
 
+            var email = form["email"].ToString();
+            var password = form["password"].ToString();
 
-                var result = await signInManager.PasswordSignInAsync(
-                    user,
-                    request.Password,
-                    false,
-                    false);
+            var user = await userManager.FindByEmailAsync(email);
 
-                if (!result.Succeeded)
-                {
-                    return Results.Unauthorized();
-                }
-                return Results.Ok("Logado com sucesso");
-            }
-        );
+            if (user is null)
+                return Results.Redirect($"/login?erro={Uri.EscapeDataString("Credenciais inválidas")}");
+            var result = await signInManager.PasswordSignInAsync(
+                user,
+                password,
+                true,
+                false);
+
+            if (!result.Succeeded)
+                return Results.Redirect($"/login?erro={Uri.EscapeDataString("Credenciais inválidas")}");
+
+            return Results.Redirect("/");
+        });
 
         app.MapPost("/logout", async (SignInManager<Usuario> signInManager) =>
         {
             await signInManager.SignOutAsync();
+            return Results.Redirect("/");
+
         });
     }
 }
