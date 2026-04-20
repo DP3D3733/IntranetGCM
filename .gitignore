@@ -1,0 +1,22 @@
+# Build outputs
+bin/
+obj/
+
+# User files
+*.user
+*.suo
+*.cache
+
+# Executáveis e DLLs (não versionar)
+*.dll
+*.exe
+
+# Visual Studio
+.vs/
+.vscode/
+
+# Logs
+*.log
+
+# Publish
+publish/
