@@ -39,6 +39,11 @@ public class UsuarioService
         return (true, new List<string>());
     }
 
+    public async Task<Usuario> GetUsuario(string id)
+    {
+        return await _userManager.FindByIdAsync(id);
+    }
+
     public async Task<List<Usuario>> ListarUsuarios()
     {
         return await _userManager.Users.ToListAsync();
