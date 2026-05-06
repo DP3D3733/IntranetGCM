@@ -75,8 +75,3 @@
 form{
     position: relative;
 }
-
-#novoUsuarioButton {
-    right: 30px;
-    transform: translatey(-120%);
-}

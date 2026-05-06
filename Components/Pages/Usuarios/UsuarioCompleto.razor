@@ -157,14 +157,12 @@ else
         {
             foreach (var error in errorsRoles)
             {
-                Console.WriteLine(error);
                 ToastService.Notify(new(ToastType.Danger, $"Erro: {error}"));
             }
             return;
         }
 
-        Console.WriteLine("Dados do usuários alterados com sucesso");
-        ToastService.Notify(new(ToastType.Success, "Dados do usuários alterados com sucesso"));
+        ToastService.Notify(new(ToastType.Success, "Dados do usuário alterados com sucesso"));
     }
 
     private void ModificaArrayRolesSelecionadas(string role, bool isChecked)

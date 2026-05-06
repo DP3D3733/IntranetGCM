@@ -5,8 +5,10 @@
 @inject NavigationManager Nav
 @inject UsuarioService usuarioService
 
-<h3 class="titulo">Usuários Cadastrados</h3>
-<Button Color="ButtonColor.Warning" Id="novoUsuarioButton" Class="left" @onclick="AcessaTelaCadastro">Cadastrar Novo Usuário</Button>
+<div class="pageHead">
+    <h3 class="titulo">Usuários Cadastrados</h3>
+    <Button Color="ButtonColor.Warning" Class="left" @onclick="AcessaTelaCadastro">Cadastrar Novo Usuário</Button>
+</div>
 
 @if (usuarios == null)
 {

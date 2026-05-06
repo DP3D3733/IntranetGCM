@@ -4,8 +4,6 @@ using IntranetGCM.Models;
 using IntranetGCM.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,8 +16,7 @@ builder.WebHost.ConfigureKestrel(options =>
 #endregion
 
 #region 🗄️ BANCO DE DADOS (EF CORE)
-// Configura o DbContext com SQL Server usando connection string do appsettings
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 #endregion
 
@@ -80,7 +77,11 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+builder.Services.AddServerSideBlazor()
+	.AddHubOptions(o =>
+	{
+		o.MaximumReceiveMessageSize = 20 * 1024 * 1024;
+	});
 #endregion
 
 #region 📦 SERVIÇOS DA APLICAÇÃO
@@ -127,7 +128,17 @@ var app = builder.Build();
 #region 🌱 EXECUÇÃO DE SEED (INICIALIZAÇÃO)
 using (var scope = app.Services.CreateScope())
 {
-    await SeedRoles(scope.ServiceProvider);
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    string[] roles = { "Admin", "User", "Com" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
 }
 #endregion
 
@@ -154,6 +165,7 @@ app.UseAntiforgery();
 
 #region 📁 STATIC + BLAZOR
 // Arquivos estáticos (css, js, etc.)
+app.UseStaticFiles();
 app.MapStaticAssets();
 
 // Mapeamento dos componentes Blazor

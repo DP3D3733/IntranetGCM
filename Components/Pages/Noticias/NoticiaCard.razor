@@ -1,6 +1,6 @@
 ﻿@using IntranetGCM.Models
 
-<div class="noticia-card">
+<div class="noticia-card" @onclick="OnClick">
     <img src="@noticia.ImagemUrl" alt="imagem" />
 
     <h4>@noticia.Titulo</h4>
@@ -12,11 +12,12 @@
     </small>
 
     <br />
-
-    <a href="/noticias/@noticia.Id">Ler mais</a>
 </div>
 
 @code {
     [Parameter]
     public Noticia noticia { get; set; }
+
+    [Parameter]
+    public EventCallback OnClick {get; set;}
 }

@@ -22,5 +22,8 @@
     <Folder Include="Endpoints\" />
     <Folder Include="wwwroot\imagens\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="wwwroot\imagens\temp\**" Watch="false" />
+  </ItemGroup>
 
 </Project>

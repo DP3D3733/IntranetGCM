@@ -1,0 +1,185 @@
+﻿@page "/noticias/nova"
+@rendermode InteractiveServer
+@using IntranetGCM.Models
+@using IntranetGCM.Services
+@using Microsoft.AspNetCore.Components.Forms
+@inject IJSRuntime JS
+@inject NoticiaService NoticiaService
+@inject ToastService ToastService
+
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+<h3>Nova Notícia</h3>
+<EditForm Model="noticia" OnSubmit="Salvar" FormName="NovaNoticiaForm">
+    <DataAnnotationsValidator />
+
+    <div class="layout-topo">
+        
+        <!-- FOTO CLICÁVEL -->
+        <div class="capa-container">
+            Capa:
+            <img src="@preview"
+                 class="capa-img"
+                 @onclick="AbrirFilePicker" />
+            
+            <InputFile id="fileInput"
+                       OnChange="SelecionarImagem"
+                       style="display:none" />
+        </div>
+
+        <!-- CAMPOS -->
+        <div class="campos">
+            <div class="form-group">
+                <label>Título:</label>
+                <InputText class="input" @bind-Value="noticia.Titulo" />
+                <ValidationMessage For="@(() => noticia.Titulo)" />
+            </div>
+
+            <div class="form-group">
+                <label>Resumo:</label>
+                <InputText class="input" @bind-Value="noticia.Resumo" />
+                <ValidationMessage For="@(() => noticia.Resumo)" />
+            </div>
+
+            <div class="form-group">
+                <label>Autor:</label>
+                <InputText class="input" @bind-Value="noticia.Autor" />
+                <ValidationMessage For="@(() => noticia.Autor)" />
+            </div>
+
+            <div class="form-group">
+                <label>Categoria:</label>
+                <select @bind="noticia.CategoriaId">
+                    <option value="0">Selecione</option>
+                    @foreach (var c in categorias)
+                    {
+                        <option value="@c.Id">@c.Nome</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO EMBAIXO -->
+    <div class="form-group mt-3">
+        <label>Conteúdo:</label>
+        <textarea id="editor"></textarea>
+        
+    </div>
+
+    <Button Color="ButtonColor.Primary" Type="ButtonType.Submit">
+        Salvar
+    </Button>
+</EditForm>
+@code {
+    private Noticia noticia = new();
+    private List<CategoriaNoticia> categorias = new();
+    private IBrowserFile imagemSelecionada;
+    private string preview = "/imagens/default-capa.jpg";
+    private DotNetObjectReference<NovaNoticia> objRef;
+
+    private string? imagemFinalUrl;
+
+    private async Task AbrirFilePicker()
+    {
+        await JS.InvokeVoidAsync("openFilePicker", "fileInput");
+    }
+    private bool _init;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_init)
+        {
+            _init = true;
+            await JS.InvokeVoidAsync("tinyHelper.init", "#editor", objRef);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = await NoticiaService.ListarCategorias();
+        objRef = DotNetObjectReference.Create(this);
+    }
+
+    private async Task Salvar()
+    {
+        noticia.Conteudo = await JS.InvokeAsync<string>("tinyHelper.getValue");
+        if (noticia.Conteudo is null || noticia.Conteudo == "")
+        {
+            ToastService.Notify(new(ToastType.Danger, $"Erro: Conteúdo da notícia não pode estar em branco"));
+            return;
+        }
+
+        if (noticia.CategoriaId == 0)
+        {
+            ToastService.Notify(new(ToastType.Danger, "Categoria inválida"));
+            return;
+        }
+        if (imagemSelecionada != null)
+        {
+            string nomeArquivo = Guid.NewGuid() + Path.GetExtension(imagemSelecionada.Name);
+
+            string pastaTemp = Path.Combine("wwwroot/imagens/temp");
+            string pastaFinal = Path.Combine("wwwroot/imagens/capas");
+
+            Directory.CreateDirectory(pastaTemp);
+            Directory.CreateDirectory(pastaFinal);
+
+            string tempPath = Path.Combine(pastaTemp, nomeArquivo);
+            string finalPath = Path.Combine(pastaFinal, nomeArquivo);
+
+            // salva no temp
+            using (FileStream stream = new FileStream(tempPath, FileMode.Create))
+            {
+                await imagemSelecionada
+                    .OpenReadStream(5 * 1024 * 1024)
+                    .CopyToAsync(stream);
+            }
+
+            // move para final
+            File.Move(tempPath, finalPath, true);
+
+            noticia.ImagemUrl = $"/imagens/capas/{nomeArquivo}";
+        }
+        noticia.ImagemUrl ??= "/imagens/default-capa.jpg";
+
+        var resultado = await NoticiaService.Criar(noticia);
+
+        if (!resultado.Sucesso)
+        {
+            ToastService.Notify(new(ToastType.Danger, $"{resultado.Erro}"));
+        }
+        ToastService.Notify(new(ToastType.Success, $"Notícia criada com sucesso!"));
+    }
+
+    private async Task SelecionarImagem(InputFileChangeEventArgs e)
+    {
+        imagemSelecionada = e.File;
+
+        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(e.File.Name)}";
+        var folder = Path.Combine("wwwroot/imagens/temp");
+
+        Directory.CreateDirectory(folder);
+
+        var path = Path.Combine(folder, fileName);
+
+        await using var stream = new FileStream(path, FileMode.Create);
+        await imagemSelecionada.OpenReadStream(5 * 1024 * 1024)
+                               .CopyToAsync(stream);
+
+        // URL leve (NÃO base64)
+        noticia.ImagemUrl = $"/imagens/temp/{fileName}";
+        preview = noticia.ImagemUrl;
+
+    }
+
+    void Informar()
+    {
+        Console.WriteLine("Inválido");
+    }
+
+    [JSInvokable]
+    public void AtualizarConteudo(string value)
+    {
+        noticia.Conteudo = value;
+    }
+}

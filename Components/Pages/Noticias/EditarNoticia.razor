@@ -1,4 +1,4 @@
-﻿@page "/noticias/nova"
+﻿@page "/noticias/edit/{id:int}"
 @rendermode InteractiveServer
 @using IntranetGCM.Models
 @using IntranetGCM.Services
@@ -6,9 +6,9 @@
 
 @inject NoticiaService NoticiaService
 
-<h3>Nova Notícia</h3>
+<h3>Editar Notícia</h3>
 
-<EditForm Model="noticia" OnValidSubmit="Salvar">
+<EditForm Model="@updateNoticiaRequest">
     <DataAnnotationsValidator />
     <div>
         <label>Imagem:</label>
@@ -20,27 +20,27 @@
     }
     <div>
         <label>Título:</label>
-        <InputText @bind-Value="noticia.Titulo" />
+        <InputText @bind-Value="updateNoticiaRequest.Titulo" />
     </div>
 
     <div>
         <label>Resumo:</label>
-        <InputText @bind-Value="noticia.Resumo" />
+        <InputText @bind-Value="updateNoticiaRequest.Resumo" />
     </div>
 
     <div>
         <label>Conteúdo:</label>
-        <InputTextArea @bind-Value="noticia.Conteudo" />
+        <InputTextArea @bind-Value="updateNoticiaRequest.Conteudo" />
     </div>
 
     <div>
         <label>Autor:</label>
-        <InputText @bind-Value="noticia.Autor" />
+        <InputText @bind-Value="updateNoticiaRequest.Autor" />
     </div>
 
     <div>
         <label>Categoria:</label>
-        <select @bind="noticia.CategoriaId">
+        <select @bind="updateNoticiaRequest.CategoriaId">
             <option value="0">Selecione uma categoria</option>
             @foreach (var c in categorias)
             {
@@ -53,19 +53,36 @@
 </EditForm>
 
 @code {
-    private Noticia noticia = new();
+    [Parameter]
+    public int id { get; set; }
+    private Noticia? noticia;
+    public UpdateNoticiaRequest updateNoticiaRequest = new();
     private List<CategoriaNoticia> categorias = new();
     private IBrowserFile imagemSelecionada;
     private string preview;
 
     protected override async Task OnInitializedAsync()
     {
+        noticia = await NoticiaService.GetNoticia(id);
+        updateNoticiaRequest.Titulo = noticia.Titulo;
+        updateNoticiaRequest.Resumo = noticia.Resumo;
+        updateNoticiaRequest.Conteudo = noticia.Conteudo;
+        updateNoticiaRequest.Autor = noticia.Autor;
+        updateNoticiaRequest.Ativa = noticia.Ativa;
+        updateNoticiaRequest.ImagemUrl = noticia.ImagemUrl;
+        updateNoticiaRequest.CategoriaId = noticia.CategoriaId;
+
+        if(updateNoticiaRequest.ImagemUrl != null)
+        {
+            preview = updateNoticiaRequest.ImagemUrl;
+        }
+        
         categorias = await NoticiaService.ListarCategorias();
     }
 
     private async Task Salvar()
     {
-        if (noticia.CategoriaId == 0)
+        @* if (noticia.CategoriaId == 0)
         {
             Console.WriteLine("Categoria inválida");
             return;
@@ -82,7 +99,7 @@
             noticia.ImagemUrl = "/imagens/" + nomeArquivo;
         }
 
-        await NoticiaService.Criar(noticia);
+        //await NoticiaService.Criar(noticia); *@
     }
 
     private async Task SelecionarImagem(InputFileChangeEventArgs e)

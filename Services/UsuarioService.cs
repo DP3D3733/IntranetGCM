@@ -9,12 +9,15 @@ public class UsuarioService
     private readonly UserManager<Usuario> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public UsuarioService(UserManager<Usuario> userManager, RoleManager<IdentityRole> roleManager, IHttpContextAccessor httpContextAccessor)
+
+    public UsuarioService(UserManager<Usuario> userManager, RoleManager<IdentityRole> roleManager, IHttpContextAccessor httpContextAccessor, IServiceScopeFactory scopeFactory)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _httpContextAccessor = httpContextAccessor;
+        _scopeFactory = scopeFactory;
     }
 
     public async Task<(bool Success, List<string> Errors)> RegisterAsync(RegisterRequest request)
@@ -41,7 +44,10 @@ public class UsuarioService
 
     public async Task<Usuario> GetUsuario(string id)
     {
-        return await _userManager.FindByIdAsync(id);
+        using var scope = _scopeFactory.CreateScope();
+
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
+        return await userManager.FindByIdAsync(id);
     }
 
     public async Task<List<Usuario>> ListarUsuarios()

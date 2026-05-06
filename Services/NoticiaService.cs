@@ -5,33 +5,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntranetGCM.Services;
 
+using Microsoft.EntityFrameworkCore;
+
 public class NoticiaService
 {
-	private readonly AppDbContext _context;
+	private readonly IDbContextFactory<AppDbContext> _factory;
 
-	public NoticiaService(AppDbContext context)
+	public NoticiaService(IDbContextFactory<AppDbContext> factory)
 	{
-		_context = context;
+		_factory = factory;
 	}
 
-	public async Task Criar(Noticia noticia)
+	public async Task<(bool Sucesso, string? Erro)> Criar(Noticia noticia)
 	{
-		_context.Noticias.Add(noticia);
-		await _context.SaveChangesAsync();
+		try
+		{
+			using var context = _factory.CreateDbContext();
+
+			context.Noticias.Add(noticia);
+
+			await context.SaveChangesAsync();
+
+			return (true, null);
+		}
+		catch (Exception ex)
+		{
+			return (false, ex.Message);
+		}
 	}
 
 	public async Task<List<CategoriaNoticia>> ListarCategorias()
 	{
-		return await _context.CategoriaNoticia.ToListAsync();
+		using var context = _factory.CreateDbContext();
+		return await context.CategoriaNoticia.ToListAsync();
 	}
 
 	public async Task<List<Noticia>> ListarNoticia()
 	{
-		return await _context.Noticias.ToListAsync();
+		using var context = _factory.CreateDbContext();
+		return await context.Noticias.ToListAsync();
 	}
 
 	public async Task<Noticia> GetNoticia(int id)
 	{
-		return await _context.Noticias.FindAsync(id);
+		using var context = _factory.CreateDbContext();
+		return await context.Noticias.FindAsync(id);
 	}
 }
