@@ -17,7 +17,7 @@ public class Noticia
 	[Required(ErrorMessage = "O autor é obrigatório")]
 	public string Autor { get; set; }
 	[Required(ErrorMessage = "A data de publicação é obrigatória")]
-	public DateTime DataPublicacao { get; set; }
+	public DateTime DataPublicacao { get; set; } = DateTime.Now;
 	public DateTime? DataAtualizacao { get; set; }
 	[Required(ErrorMessage = "A anotação de ativa ou não é obrigatória")]
 	public bool Ativa { get; set; } = true;

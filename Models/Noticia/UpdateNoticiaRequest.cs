@@ -4,6 +4,8 @@ namespace IntranetGCM.Models;
 
 public class UpdateNoticiaRequest
 {
+	[Key]
+	public int Id { get; set; }
 	[Required (ErrorMessage = "O título é obrigatório")]
 	[StringLength(200, ErrorMessage = "O tamanho máximo do título não pode exceder 200 caracteres.")]
 	public string Titulo { get; set; }

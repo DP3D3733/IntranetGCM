@@ -84,13 +84,24 @@ window.tinyHelper = {
         });
     },
 
-    getValue: function () {
-        return window.tinyValue || "";
+    getValue: function(selector) {
+        // Tenta pegar a instância pelo seletor (removendo o # se existir)
+        const editor = tinymce.get(selector.replace('#', ''));
+    
+        if (editor) {
+            return editor.getContent(); // Pega o HTML atualizado direto da fonte
+        }
+        return window.tinyValue || ""; 
     },
 
-    setContent: function (selector, content) {
-        tinymce.get(selector.replace('#', '')).setContent(content || '');
-    }
+    setContent: function(selector, content) {
+
+        const editor = tinymce.get(selector.replace('#', ''));
+
+        if (editor) {
+            editor.setContent(content || '');
+        }
+    },
 };
 
 window.openFilePicker = (id) => {

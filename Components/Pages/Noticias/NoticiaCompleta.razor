@@ -55,6 +55,6 @@
 
     void EditaNoticia()
     {
-        nav.NavigateTo($"/noticias/edit/{noticia.Id}");
+        nav.NavigateTo($"/noticias/edit/{noticia.Id}", forceLoad: true);
     }
 }

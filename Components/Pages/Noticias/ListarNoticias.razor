@@ -6,7 +6,7 @@
 @rendermode InteractiveServer
 
 <div class="pageHead">
-    <h3 class="titulo">Noticias</h3>
+    <h3 class="titulo">Notícias</h3>
     <AuthorizeView Roles="Com">
         <Button Color="ButtonColor.Warning" Class="left" @onclick="AcessaTelaNovaNoticia">Nova Notícia</Button>
     </AuthorizeView>
@@ -16,6 +16,10 @@
 @if (noticias == null)
 {
     <p>Carregando...</p>
+}
+else if (!noticias.Any())
+{
+    <p>Não há notícias...</p>
 }
 else
 {
